@@ -26,7 +26,7 @@ public class SystemUsersPageTest extends TestBase {
 		Map<String,String> TestDataInMap=ExcelHandler.getTestDataInMap(prop.getProperty("sheetname"),method.getName());
 		systemuserspage = new SystemUsersPage();
 		systemuserspage.creatingSystemAdmin(TestDataInMap.get("OrganizationCode"),TestDataInMap.get("FirstName"), TestDataInMap.get("LastName"),TestDataInMap.get("EmailId"),
-		TestDataInMap.get("UserName"), TestDataInMap.get("Password"),TestDataInMap.get("CnfPassword"),TestDataInMap.get("Role")//"System Admin");
+		TestDataInMap.get("UserName"), TestDataInMap.get("Password"),TestDataInMap.get("CnfPassword"),TestDataInMap.get("Role"));
 		extentTest.log(extentTest.getStatus(), "System User created successfully");
 		ExcelHandler.UpdateTestResultsToExcel(prop.getProperty("sheetname"), "Pass", method.getName());
 		
@@ -55,12 +55,13 @@ public class SystemUsersPageTest extends TestBase {
 	}
 	@Test(priority = 307)
 	public void validateTenantLicenseAdminTest(Method method) throws Exception {
-		extentTest = extent.createTest("creatingSystemAdminTest", "TC_008: Verify create System User");
-		//Map<String,String> TestDataInMap=ExcelHandler.getTestDataInMap(prop.getProperty("sheetname"),method.getName());
+		extentTest = extent.createTest("creatingSystemAdminTest", "TC_enhancement: Verify create Tenant License Admin");
+		Map<String,String> TestDataInMap=ExcelHandler.getTestDataInMap(prop.getProperty("sheetname"),method.getName());
 		systemuserspage = new SystemUsersPage();
-		systemuserspage.creatingTenantLicenseAdmin("SYSADMIN","TenantLicense","Admin","TenantLicenseAdmin@gmail.com","TLA01","Pune@123","Pune@123","Tenant License Admin");		
-		extentTest.log(extentTest.getStatus(), "System User created successfully");
-		//ExcelHandler.UpdateTestResultsToExcel(prop.getProperty("sheetname"), "Pass", method.getName());
+		systemuserspage.creatingTenantLicenseAdmin(TestDataInMap.get("OrganizationCode"),TestDataInMap.get("FirstName"), TestDataInMap.get("LastName"),TestDataInMap.get("EmailId"),
+		TestDataInMap.get("UserName"), TestDataInMap.get("Password"),TestDataInMap.get("CnfPassword"),TestDataInMap.get("Role"));		
+		extentTest.log(extentTest.getStatus(), "Tenant License Admin created successfully");
+		ExcelHandler.UpdateTestResultsToExcel(prop.getProperty("sheetname"), "Pass", method.getName());
 	}
 	@Test(priority=153)
 	public void validateSystemUsersPageTest(Method method) throws Exception {
