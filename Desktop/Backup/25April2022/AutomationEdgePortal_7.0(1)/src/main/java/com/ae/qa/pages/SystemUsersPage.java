@@ -58,12 +58,15 @@ public class SystemUsersPage extends TestBase {
 	WebElement pageTitle;
 	@FindBy(xpath = "//p[@class='alert-message-text']")
 	WebElement alertMessage;
-
+	@FindBy(id = "role")
+	WebElement roledropdown;
+	@FindBy(xpath = "//span[@class='mul-dorpdown-button']")
+	WebElement tenantdrpdownlist;
 	public SystemUsersPage() {
 		PageFactory.initElements(driver, this);
 	}
-	public void creation(String FName, String LName, String UserMail, String UserName, String Pswd,
-			String ConfirmPswd) throws Exception {
+	public void creation(String tenantOrgCode,String FName, String LName, String UserMail, String UserName, String Pswd,
+			String ConfirmPswd, String RoleName) throws Exception {
 		// Click Users Tab
 		loginpage.login(prop.getProperty("username"), prop.getProperty("password"));
 		Reporter.log("User logged in successfully",true);
@@ -78,9 +81,14 @@ public class SystemUsersPage extends TestBase {
 		wait.until(ExpectedConditions.visibilityOf(addBtn));
 		js.executeScript("arguments[0].click();", addBtn);
 		log.info("started creating new system admin");
-		// Start form
-	/*	Select select = new Select(tenantdrpdown);
-		select.selectByValue("SYSADMIN");*/
+		//Start form
+		tenantdrpdownlist.click();
+		Thread.sleep(3000);
+		//Select select = new Select(tenantdrpdownlist);
+		//select.selectByValue("SYSADMIN");
+		WebElement select_tenant=driver.findElement(By.xpath("//div[@id='options-list']/li/label[contains(text(),'"+tenantOrgCode+"')]/span"));
+		select_tenant.click();
+		tenantdrpdownlist.click();
 		Thread.sleep(2000);
 		fName.sendKeys(FName);
 		Thread.sleep(2000);
@@ -94,12 +102,16 @@ public class SystemUsersPage extends TestBase {
 		Thread.sleep(2000);
 		confirmPswd.sendKeys(ConfirmPswd);
 		Thread.sleep(10000);
+		Select select_role = new Select(roledropdown);
+		select_role.selectByVisibleText(RoleName);
+		Thread.sleep(5000);
 		js.executeScript("arguments[0].click();", createBtn);
-	
+		Thread.sleep(5000);
+
 	}
-	public void creatingSystemAdmin(String FName, String LName, String UserMail, String UserName, String Pswd,
-			String ConfirmPswd) throws Exception {
-		creation(FName,LName,UserMail,UserName,Pswd,ConfirmPswd);
+	public void creatingSystemAdmin(String tenantOrgCode,String FName, String LName, String UserMail, String UserName, String Pswd,
+			String ConfirmPswd, String RoleName) throws Exception {
+		creation(tenantOrgCode,FName,LName,UserMail,UserName,Pswd,ConfirmPswd,RoleName);
 		wait.until(ExpectedConditions.visibilityOf(alertMessage));
 		String actual_Msg=alertMessage.getText();
 		String expected_Msg=Messages.creationOfUser;
@@ -119,19 +131,22 @@ public class SystemUsersPage extends TestBase {
 		informationpage.validateSignOut();
 	}
 
-	public void creatingSystemAdminWithWrongPswd(String FName, String LName, String UserMail, String UserName,
-			String Pswd, String ConfirmPswd) throws Exception {
-		creation(FName,LName,UserMail,UserName,Pswd,ConfirmPswd);	
+	public void creatingSystemAdminWithWrongPswd(String tenantOrgCode,String FName, String LName, String UserMail, String UserName,
+			String Pswd, String ConfirmPswd, String RoleName) throws Exception {
+		creation(tenantOrgCode,FName,LName,UserMail,UserName,Pswd,ConfirmPswd,RoleName);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("arguments[0].click();", createBtn);
+		Thread.sleep(5000);
 		String errorMsg = confirmationError.getText();
 		Reporter.log("Actual message when user both passwords are not same: "+errorMsg,true);
 		Assert.assertEquals(errorMsg, Messages.passwordMismatch, "Not getting correct result on password mismatch");
-	    Reporter.log("Got correct error when there is mismatch in password",true);
+		Reporter.log("Got correct error when there is mismatch in password",true);
 		informationpage.validateSignOut();	
 	}
 
-	public void EditSystemUsers(String FName, String LName, String UserMail, String UserName, String Pswd,
-			String ConfirmPswd, String NewUserMail) throws Exception {
-		creation(FName,LName,UserMail,UserName,Pswd,ConfirmPswd);
+	public void EditSystemUsers(String tenantOrgCode,String FName, String LName, String UserMail, String UserName, String Pswd,
+			String ConfirmPswd,String RoleName, String NewUserMail) throws Exception {
+		creation(tenantOrgCode,FName,LName,UserMail,UserName,Pswd,ConfirmPswd,RoleName);
 		wait.until(ExpectedConditions.visibilityOf(alertMessage));
 		String actual_Msg=alertMessage.getText();
 		String expected_Msg=Messages.creationOfUser;
@@ -139,10 +154,12 @@ public class SystemUsersPage extends TestBase {
 		Reporter.log("User is created successfully",true);
 		Thread.sleep(4000);
 		driver.findElement(By.xpath("//table/tr/td/label[@title='" + UserName + "']")).click();
+		driver.findElement(By.xpath("//table/tr/td/span")).click();
 		System.out.println("clicking on edit user & editing emailID");
 		for (int i = 0; i < 30; i++) {
 			userMail.sendKeys(Keys.BACK_SPACE);
 		}
+		Thread.sleep(4000);
 		userMail.sendKeys(NewUserMail);
 		saveBtn.click();
 		String actual_EditUserMsg = editUserMsg.getText();
@@ -152,6 +169,24 @@ public class SystemUsersPage extends TestBase {
 		Assert.assertEquals(actual_EditUserMsg, expected_EditUserMsg, "System User details not edited successfully");
 		Reporter.log("System User details got edited.",true);
 		informationpage.validateSignOut();
+	}
+	public void creatingTenantLicenseAdmin(String tenantOrgCode,String FName, String LName, String UserMail, String UserName, String Pswd,
+			String ConfirmPswd, String RoleName) throws Exception{
+		creation(tenantOrgCode,FName,LName,UserMail,UserName,Pswd,ConfirmPswd,RoleName);
+		wait.until(ExpectedConditions.visibilityOf(alertMessage));
+		String actual_Msg=alertMessage.getText();
+		String expected_Msg=Messages.creationOfUser;
+		Assert.assertEquals(actual_Msg,expected_Msg,"User not created");
+		Reporter.log("User is created successfully",true);
+		Thread.sleep(15000);
+        String actual_UserName = driver.findElement(By.xpath("//table/tr/td/label[@title='" + UserName + "']")).getText();
+		String expected_UserName = UserName;
+		System.out.println("Actual Username:" + actual_UserName);
+		System.out.println("Expected Username:" + expected_UserName);
+		Assert.assertEquals(actual_UserName, expected_UserName, "Tenant License Admin can not added in list");
+		Reporter.log("Tenant License Admin is verified and present in the webtable",true);
+		informationpage.validateSignOut();
+
 	}
 	public void validateSystemUsersPage(String PageTitle) throws Exception {
 		loginpage.login(prop.getProperty("username"), prop.getProperty("password"));
@@ -163,12 +198,13 @@ public class SystemUsersPage extends TestBase {
 		// Click System Users Tab
 		wait.until(ExpectedConditions.visibilityOf(systemUsersTab));
 		js.executeScript("arguments[0].click();", systemUsersTab);
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-				//Now validate page title is same as expected
+		Thread.sleep(5000);		
+		//driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		//Now validate page title is same as expected
 		String actual_title=pageTitle.getText();
 		String expected_title=PageTitle;
 		Reporter.log("Actual page title displayed on screen is: "+actual_title+ " and Expected "
-						+ "page title is: "+expected_title,true);
+				+ "page title is: "+expected_title,true);
 		Assert.assertEquals(actual_title, expected_title,"Appropriate page didn't loaded properly");
 		Reporter.log("Respective Page is clicked and appropriate page is loaded properly",true);
 		informationpage.validateSignOut();
